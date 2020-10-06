@@ -68,7 +68,7 @@ class Bust(commands.Cog):
     data.close()
 
   @commands.command()
-  async def profile(self, ctx, user:discord.User=None):
+  async def profile(self, ctx, *, user:discord.User=None):
     datab = sqlite3.connect('main.db')
     curse = datab.cursor()
     if user is None:
@@ -77,7 +77,7 @@ class Bust(commands.Cog):
       if result is None:
         await ctx.send("You haven't busted yet! use `?bust` to get you information!")
       else:
-        emmbeed = discord.Embed(title = f"{ctx.author.name}'s Profile'")
+        emmbeed = discord.Embed(title = f"{ctx.author.name}'s Profile")
         emmbeed.add_field(name = "Level", value = f"{result[0]}")
         emmbeed.add_field(name = "Total Busts", value = f"{result[1]}")
         emmbeed.add_field(name = "Points", value = f"{result[2]}/{result[3]}")
@@ -91,7 +91,7 @@ class Bust(commands.Cog):
       if result is None:
         await ctx.send("This person does not have a profile.")
       else:
-        emmbeed = discord.Embed(title = f"{user.name}'s Profile'")
+        emmbeed = discord.Embed(title = f"{user.name}'s Profile")
         emmbeed.add_field(name = "Level", value = f"{result[0]}")
         emmbeed.add_field(name = "Total Busts", value = f"{result[1]}")
         emmbeed.add_field(name = "Points", value = f"{result[2]}/{result[3]}")
@@ -99,6 +99,12 @@ class Bust(commands.Cog):
         emmbeed.add_field(name = "Points earned per bust", value = f"Minimum: {result[6]}\nMaximum: {result[5]}")
         emmbeed.set_thumbnail(url="{}".format(user.avatar_url))
         await ctx.send(embed=emmbeed)
+  @profile.error
+  async def profile_error(self, ctx, error):
+    if isinstance(error, commands.UserNotFound):
+      await ctx.send("That person is not in this server!")
+    else:
+      raise error
 
 def setup(client):
   client.add_cog(Bust(client))
